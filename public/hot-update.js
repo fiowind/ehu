@@ -23,14 +23,14 @@ docReady(function () {
      */
     var options = window.EHU_HOT_UPDATE_OPTIONS = {
         styleTypeList: ['css', 'less'],
-        tplTypeList: ['tpl', 'etpl', 'etpl/tpl'],
+        tplTypeList: ['tpl.html'],
         componentType: 'fc-component-ria/component',
         updateLimit: 100,
         etpl: {
-            isOverride: false
+            isOverride: true
         },
         component: {
-            isOverride: false
+            isOverride: true
         }
     };
 
@@ -49,9 +49,19 @@ docReady(function () {
      * @returns {*|boolean}
      */
     function isRes(moduleId, cmp) {
-        var arr = moduleId.split('!');
         !Array.isArray(cmp) && (cmp = [cmp]);
-        return arr[1] && cmp.indexOf(arr[0]) > -1;
+        for(var i in cmp) {
+            if (moduleId.indexOf(cmp[i]) > -1) {
+                return true;
+            }
+        }
+    }
+
+    function addStyle(moduleId, cb) {
+        var css = document.createElement("link");
+        css.rel = "stylesheet";
+        css.href = moduleId+"?version=" + Date.parse(new Date());
+        document.getElementsByTagName("head")[0].appendChild(css);
     }
 
     /**
@@ -63,6 +73,7 @@ docReady(function () {
      * @returns {*}
      */
     function hotUpdate(moduleId, round, cb) {
+        log(moduleId);
         var host = [];
         round = round || 0;
         // 判断module是否加载
@@ -99,7 +110,7 @@ docReady(function () {
     function getLogMsgPrefix() {
         return '[EHU] ' + (new Date()).toLocaleString() + ' ';
     }
-    
+
     function init() {
         // 建立连接
         socket.on('hello', function () {
@@ -107,13 +118,27 @@ docReady(function () {
         });
         // 检测到文件改动
         socket.on('hotUpdate', function (file) {
-            // log(getLogMsgPrefix(), '检测到文件改动', file);
+            log(getLogMsgPrefix(), '检测到文件改动', file);
+            if(/\.less$/.test(file)){
+                log('这是个less文件, 正在更新');
+                addStyle('src/biz.less');
+                return;
+            }
             var moduleId = window.EHU_URL_MODULE_ID_MAP[file];
             if (!moduleId) {
+                console.log('no', file);
                 return;
             }
             var updateLimit = options.updateLimit;
-            var cb = function () {};
+            log(updateLimit);
+
+
+            var cb = function () {
+                window.require(['er/locator'],function(locator){
+                    locator.reload();
+                })
+            };
+            log(moduleId);
             // 样式
             if (isRes(moduleId, options.styleTypeList)) {
                 updateLimit = 0;
@@ -121,20 +146,23 @@ docReady(function () {
             // 模板
             if (isRes(moduleId, options.tplTypeList)) {
                 updateLimit = 1;
-                options.etpl.isOverride = true;
-                cb = function () {
-                    options.etpl.isOverride = false;
-                };
+                // options.etpl.isOverride = true;
+                // log
+                // cb = function () {
+                //     log('22');
+                //     options.etpl.isOverride = false;
+                // };
             }
             // Component
             if (isRes(moduleId, options.componentType)) {
                 updateLimit = 1;
-                options.component.isOverride = true;
-                cb = function () {
-                    options.component.isOverride = false;
-                };
+                // options.component.isOverride = true;
+                // cb = function () {
+                //     options.component.isOverride = false;
+                // };
             }
             var msg = '';
+
             var ret = hotUpdate(moduleId, updateLimit, cb);
             if (ret) {
                 msg = [
@@ -147,7 +175,6 @@ docReady(function () {
             }
         });
     }
-    
+
     init();
 });
-	
