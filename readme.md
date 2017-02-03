@@ -1,3 +1,39 @@
+## 针对Console/Osp对应模块的热更新
+* 配置ehu.config, 放在tools目录下（举例iot，需要配DNS）
+
+```
+{
+
+    "defaultServer": "http://localhost.bcetest.baidu.com:8899",
+    "defaultServerCLI": "正常启动的bash",
+    "baseDir": "../src/iot",
+    "watchDirs": "src",
+    "indexDir": "../src",
+    "indexHTML": "/common/ehu-index.html",
+    "module": "/iot",
+    "port": 8844
+    
+}
+```
+
+例子见代码中的console-ehu.config 和 osp-ehu.config
+## 启动
+> git clone https://github.com/fiowind/ehu.git && cd ehu && npm i && cd ../
+> 
+> cd console/tools
+> 
+> ./server.sh
+> 
+> node ../../ehu/bin/ehu.js -n  #（这里的路径根据你自己存放该代码库的路径改变）
+
+*上面是各自启动两个服务*
+
+1. chrome://net-internals/#hsts 中将localhost.bcetest.baidu.com删除
+2. 访问热更新地址：http://localhost.bcetest.baidu.com:8844/iot/?ed&no_xss&locale=zh-cn#
+3. 原 https://localhost.bcetest.baidu.com:port 和原来一样访问，不受esl-hot-update影响
+
+-------
+***以下为原说明***
 # EHU(esl-hot-update)
 
 - 与默认的web server完美解耦，可以支持http-server、edp webserver start等原来的启动逻辑
@@ -72,3 +108,5 @@
 
 - 先按原来的方式启动默认web server，如edp webserver start
 - 再在启动web server的路径，重开一个命令行窗口启动ehu，并加参数-n，即ehu -n
+
+
