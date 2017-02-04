@@ -57,11 +57,18 @@ docReady(function () {
         }
     }
 
-    function addStyle(moduleId, cb) {
-        var css = document.createElement("link");
-        css.rel = "stylesheet";
-        css.href = moduleId+"?version=" + Date.parse(new Date());
-        document.getElementsByTagName("head")[0].appendChild(css);
+    function replaceStyle(moduleId, cb) {
+        var links = document.getElementsByTagName("link");
+        for (var i in links) {
+            var link = links[i];
+            var reg = new RegExp(moduleId);
+
+            if(link.rel === "stylesheet" && reg.test(link.href)){
+                console.log("finish：", link);
+                link.href = moduleId+"?version=" + Date.parse(new Date());
+                return;
+            }
+        }
     }
 
     /**
@@ -121,7 +128,7 @@ docReady(function () {
             log(getLogMsgPrefix(), '检测到文件改动', file);
             if(/\.less$/.test(file)){
                 log('这是个less文件, 正在更新');
-                addStyle('src/biz.less');
+                replaceStyle('src/biz.less');
                 return;
             }
             var moduleId = window.EHU_URL_MODULE_ID_MAP[file];
