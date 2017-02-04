@@ -1,30 +1,34 @@
 ## 针对Console/Osp对应模块的热更新
 * 配置ehu.config, 放在tools目录下（举例iot，需要配DNS）
 
-```
+```js
 {
-
-    "defaultServer": "http://localhost.bcetest.baidu.com:8899",
+    // 默认的web server地址，需用localhost.bcetest.baidu.com
+    "defaultServer": "https://localhost.bcetest.baidu.com:8899",
     "defaultServerCLI": "正常启动的bash",
+    // 从服务器根目录到需要监控的文件夹中间path
     "baseDir": "../src/iot",
+    // hot update 需要watch的文件夹（不包括baseDir）
     "watchDirs": "src",
+    // 下面两项默认这么设，不用管
     "indexDir": "../src",
     "indexHTML": "/common/ehu-index.html",
+    // 模块
     "module": "/iot",
+    // ehu启动端口号（不可与默认的服务器端口号冲突）
     "port": 8844
-    
 }
 ```
 
-例子见代码中的console-ehu.config 和 osp-ehu.config
+例子见代码中的console-ehu.config 和 osp-ehu.config, 建议直接拿来修改模块名即可
 ## 启动
+> cd console或osp的同级目录或你自己喜欢的地方
+> 
 > git clone https://github.com/fiowind/ehu.git && cd ehu && npm i && cd ../
 > 
-> cd console/tools
+> cd console/tools && ./server.sh #启动原服务
 > 
-> ./server.sh
-> 
-> node ../../ehu/bin/ehu.js -n  #（这里的路径根据你自己存放该代码库的路径改变）
+> node ../../ehu/bin/ehu.js -n  #启动热更新服务，这里的路径根据你自己存放该代码库的路径改变
 
 *上面是各自启动两个服务*
 
@@ -33,7 +37,7 @@
 3. 原 https://localhost.bcetest.baidu.com:port 和原来一样访问，不受esl-hot-update影响
 
 -------
-***以下为原说明***
+***以下为原说明, 针对其他不明项目***
 # EHU(esl-hot-update)
 
 - 与默认的web server完美解耦，可以支持http-server、edp webserver start等原来的启动逻辑
