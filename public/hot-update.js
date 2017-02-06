@@ -118,6 +118,12 @@ docReady(function () {
         return '[EHU] ' + (new Date()).toLocaleString() + ' ';
     }
 
+    function getQueryString(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]); return null;
+    }
+
     function init() {
         // 建立连接
         socket.on('hello', function () {
@@ -141,9 +147,20 @@ docReady(function () {
 
 
             var cb = function () {
-                window.require(['er/locator'],function(locator){
-                    locator.reload();
-                })
+                if(getQueryString('config')==='true'){
+                    var moduleId = location.href.match(/\/([a-zA-Z]{2,10})\//)[1];
+                    console.log(moduleId);
+                    window.require([moduleId+'/startup'],function(module){
+                        module.start();
+                        window.require(['er/locator'],function(locator){
+                            locator.reload();
+                        });
+                    });
+                } else {
+                    window.require(['er/locator'],function(locator){
+                        locator.reload();
+                    });
+                }
             };
             log(moduleId);
             // 样式
